@@ -1,11 +1,12 @@
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
+const config = require('config');
 
 const app = express();
 app.use(express.json()); // body parser for JSON middleware
 
-const db = require('./config/keys').mongoURI;
+const db = config.get('mongoURI');
 
 //connect ot mongoDB
 mongoose.connect(

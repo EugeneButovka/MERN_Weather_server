@@ -28,7 +28,7 @@ exports.login = (req, res) => {
     const {email, password} = req.body;
     
     //check user exits by email and password
-    const user = UserService.isUserExists({email, password});
+    const user = UserService.getUser({email, password});
     
     console.log(user);
     if (user.error)
@@ -36,7 +36,7 @@ exports.login = (req, res) => {
     return res.json(user);
 };
 
-exports.register = (req, res) => {
+exports.register = async (req, res) => {
     console.log('try register');
     const {name, email, password} = req.body;
     
@@ -48,16 +48,29 @@ exports.register = (req, res) => {
     
     const encryptedPassword = encryptPassword(password);
     
-    const user = UserService.createUser({name, email, encryptedPassword})
-        .then(user => {
-            console.log(user);
-            return res.json(user);
-        });
+    const newUser = {
+        name,
+        email,
+        password: encryptedPassword
+    };
+    try {
+        const user = await UserService.createUser(newUser)
+        console.log('user in controller', user)
+        
+        // sync code
+        // const data = await somePromise
+        res.status(200).json(user)
+    } catch (e) {
+        return res.status(400).json({ status: 400, message: e.message });
+    }
+        
+            // console.log(user);
+      
     // console.log(user);
     // if (user.error)
     //     return res.status(400).json(user.error);
 
-    //return res.json(user);
+    // return res.json(user);
 };
 
 

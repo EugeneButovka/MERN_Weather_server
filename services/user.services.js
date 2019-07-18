@@ -2,26 +2,31 @@ const User = require('../models/user.model');
 const bcrypt = require('bcryptjs');
 const config = require('config');
 
-exports.isUserExist = function (user) {
+exports.getUser = function (user) {
     return (async () => await User
         .findOne(user)
         .catch(err => ({error: 'Error while isUserExist'})))();
 };
 
-exports.createUser = function (user) {
-    console.log('user = ', user);
-    const {name, email, encryptedPassword} = user;
+exports.createUser = async function (param) {
+    try {
+        const newUser = await User.create(param)
+        console.log('new user in service', newUser)
+        return newUser
+    } catch (err) {
+        throw new Error('err')
+    }
     
-    return new Promise((resolve, reject) => {
-        return User.create({
-            name,
-            email,
-            password: encryptedPassword
-        }, function (err, result) {
-            if (err) return reject(err);
-            resolve(result)
-        });
-    })
+    // return new Promise((resolve, reject) => {
+    //     return User.create({
+    //         name,
+    //         email,
+    //         password: encryptedPassword
+    //     }, function (err, result) {
+    //         if (err) return reject(err);
+    //         resolve(result)
+    //     });
+    // })
     
 
     

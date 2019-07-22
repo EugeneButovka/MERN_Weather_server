@@ -2,77 +2,25 @@ const User = require('../models/user.model');
 const bcrypt = require('bcryptjs');
 const config = require('config');
 
-exports.getUser = function (user) {
-    return (async () => await User
-        .findOne(user)
-        .catch(err => ({error: 'Error while isUserExist'})))();
+exports.getUser = async function (param) {
+    try {
+        const user = await User.findOne(param);
+        if (!user) throw new Error('User not found');
+        console.log('user found ', user);
+        return user;
+    }
+    catch (err) {
+        if (err.message) throw err;
+        throw new Error('Error while getUser');
+    }
 };
 
 exports.createUser = async function (param) {
     try {
-        const newUser = await User.create(param)
-        console.log('new user in service', newUser)
+        const newUser = await User.create(param);
+        console.log('new user in service ', newUser);
         return newUser
     } catch (err) {
-        throw new Error('err')
+        throw new Error('Error while createUser');
     }
-    
-    // return new Promise((resolve, reject) => {
-    //     return User.create({
-    //         name,
-    //         email,
-    //         password: encryptedPassword
-    //     }, function (err, result) {
-    //         if (err) return reject(err);
-    //         resolve(result)
-    //     });
-    // })
-    
-
-    
-    // const newUser = new User({
-    //     name,
-    //     email,
-    //     password: encryptedPassword
-    // });
-    //
-    // return saveUser(newUser);
-    /*
-    let result = (async function() {
-        try {
-            return await  newUser.save();
-        } catch (err) {
-            return {error: 'Error while saving user'};
-        }
-    })();
-    console.log('result = ', result);
-    return result;
-    */
-    /*
-    return (async () => {
-        const result = await newUser
-            .save()
-            .catch(err => ({error: 'Error while saving user'}));
-        return result;
-    })();*/
-    /*
-    return (async () => await newUser
-        .save()
-        .catch(err => ({error: 'Error while saving user'})))();*/
 };
-
-function saveUser(newUser) {
-    return new Promise((resolve, reject) => {
-        return newUser.save()
-            .then(result => resolve(result))
-            .catch(err => reject(err))
-    })
-}
-//
-// async function saveUser(newUser) {
-//
-//     const result = await newUser
-//         .save();
-//         //.catch(err => ({error: 'Error while saving user'}));
-//     return result;
-// }

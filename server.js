@@ -1,9 +1,11 @@
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 const mongoose = require('mongoose');
 const config = require('config');
 
 const app = express();
+app.use(cors());
 app.use(express.json()); // body parser for JSON middleware
 
 const db = config.get('mongoURI');

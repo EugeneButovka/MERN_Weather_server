@@ -4,49 +4,93 @@ const jwt = require('jsonwebtoken');
 const UserService = require('../services/user.services');
 
 
-const encryptPassword = (password) => {
-    return bcrypt.hashSync(password, config.get('bcryptSalt'));
+const makeWebToken = (param) => {
+    const payload = {
+        param
+    };
+    
+    const secretKey = config.get('jwtSecret');
+    
+    const options = {
+        //algorithm: 'RS256',
+        expiresIn : 3600
+    };
+    
+    
+    const result = jwt.sign(payload, secretKey, options);
+    if (!result) throw new Error("make token error");
+    console.log(result);
+    return result;
+    
 };
 
-//TODO: get to know await with bcrypt!
-//TODO: use async crypt functions instead
-const checkPassword = (password, hash) => {
-    // let hashPwd = await bcrypt.hash(password,10);
-    // console.log(await hashPwd);
-    return bcrypt.compareSync(password, hash);
+
+const hashPassword = async (password) => {
+    return await bcrypt.hash(password, config.get('bcryptSalt'));
+};
+
+
+const checkPassword = async (password, hash) => {
+    const result = await bcrypt.compare(password, hash);
+    if (!result)
+        throw new Error({error: 'Incorrect User email or password'})
+    return true;
 };
 
 const validateData = (name, email, password) => {
     //validation
     if (!name || !email || !password)
-        return {error: 'Incorrect User Data'};
-    return {error: null};
+        throw new Error({error: 'Incorrect User Data'});
+    return true;
 };
 
-exports.login = (req, res) => {
+exports.login = async (req, res) => {
     console.log('try login');
     const {email, password} = req.body;
     
-    //check user exits by email and password
-    const user = UserService.getUser({email, password});
+   
     
-    console.log(user);
-    if (user.error)
-        return res.status(400).json(user.error);
-    return res.json(user);
+    //check user by email and hashed password
+    let user = null;
+    try {
+        user = await UserService.getUser({email});
+        await checkPassword(password, user.password);
+    }
+    catch (err) {
+        return res.status(400).json({message: err.message, error: "get user error"});
+    }
+    const token = makeWebToken(user._id);
+    
+    return res.status(200).json({token});
 };
 
 exports.register = async (req, res) => {
     console.log('try register');
     const {name, email, password} = req.body;
     
-    const checkResult = validateData(name, email, password);
-    if(checkResult.error)
-        return res.status(400).json(checkResult.error);
+    try {
+        validateData(name, email, password);
+    }
+    catch (err) {
+        return res.status(400).json({message: err.message, error: "validate data error"});
+    }
     
-    //TODO: user exists check
+    //check user exits by email
+    try {
+        console.log('attempt to find user');
+        await UserService.getUser({email});
+        console.log('user found!');
+        return res.status(400).json({message: "register error", error: "user already exists"});
+    }
+    catch (err) {
+        //user not found = OK
+        console.log('user not found -> OK');
+    }
+
     
-    const encryptedPassword = encryptPassword(password);
+    
+    //create new user with hashed password
+    const encryptedPassword = await hashPassword(password);
     
     const newUser = {
         name,
@@ -54,23 +98,20 @@ exports.register = async (req, res) => {
         password: encryptedPassword
     };
     try {
-        const user = await UserService.createUser(newUser)
-        console.log('user in controller', user)
-        
-        // sync code
-        // const data = await somePromise
-        res.status(200).json(user)
-    } catch (e) {
-        return res.status(400).json({ status: 400, message: e.message });
+        const user = await UserService.createUser(newUser);
+        console.log('user created in controller', user);
+    } catch (err) {
+        return res.status(400).json({message: err.message, error: "create user error"});
     }
-        
-            // console.log(user);
-      
-    // console.log(user);
-    // if (user.error)
-    //     return res.status(400).json(user.error);
-
-    // return res.json(user);
+    
+    //const token = makeWebToken(user._id);
+    
+    //return res.status(200).json({token});
+    return res.status(200).json(user);
 };
+
+exports.checkLogin = async (req, res) => {
+
+}
 
 

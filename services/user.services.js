@@ -7,7 +7,7 @@ exports.getUser = async function (param) {
         console.log('trying to find this: ', param);
         const user = await User.findOne(param);
         if (!user) throw new Error('User not found');
-        console.log('user found ', user);
+        console.log('user found');
         return user;
     }
     catch (err) {

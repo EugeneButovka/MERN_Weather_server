@@ -9,7 +9,7 @@ exports.getUser = async (req, res) => {
     try {
         console.log('attempt to find user');
 
-        console.log('req.params', req.params);
+        //console.log('req.params', req.params);
         const user = await UserService.getUser(req.params);
         console.log('user found!');
         return res.status(200).json(user);

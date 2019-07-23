@@ -21,10 +21,10 @@ exports.checkToken = (req, res, next) => {
     //     return res.status(400).json({message: err.message, error: "wrong token"});
     // }
     jwt.verify(token, secretKey, async function(err, decoded) {
-        console.log('err MW', err)
+        if (err) console.log('err MW', err);
     
         if(err) return res.status(403).json({message: 'Forbidden'});
-        console.log('decoded', decoded) // bar
+        console.log('decoded', decoded); // bar
         try {
             user = await UserService.getUser({_id: decoded._id});
             req.user = user;

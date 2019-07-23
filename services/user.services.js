@@ -4,6 +4,7 @@ const config = require('config');
 
 exports.getUser = async function (param) {
     try {
+        console.log('trying to find this: ', param);
         const user = await User.findOne(param);
         if (!user) throw new Error('User not found');
         console.log('user found ', user);

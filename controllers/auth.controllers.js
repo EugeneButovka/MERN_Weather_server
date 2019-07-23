@@ -3,27 +3,33 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const UserService = require('../services/user.services');
 
-
+//===============TOKEN ROUTINE============
 const makeWebToken = (param) => {
     const payload = {
-        param
+        _id: param
     };
     
     const secretKey = config.get('jwtSecret');
     
     const options = {
         //algorithm: 'RS256',
-        expiresIn : 3600
+        expiresIn: 3600
     };
     
-    
-    const result = jwt.sign(payload, secretKey, options);
-    if (!result) throw new Error("make token error");
+    let result = null;
+    try {
+        result = jwt.sign(payload, secretKey, options);
+    } catch (err) {
+        throw new Error("make token error");
+    }
+    if (!result) new Error("made wrong token");
     console.log(result);
     return result;
     
 };
+// //=======================================
 
+//===============HASH ROUTINE============
 
 const hashPassword = async (password) => {
     return await bcrypt.hash(password, config.get('bcryptSalt'));
@@ -33,35 +39,52 @@ const hashPassword = async (password) => {
 const checkPassword = async (password, hash) => {
     const result = await bcrypt.compare(password, hash);
     if (!result)
-        throw new Error({error: 'Incorrect User email or password'})
+        throw new Error({error: 'Incorrect User email or password'});
     return true;
 };
+//=======================================
 
-const validateData = (name, email, password) => {
+
+//================AUXILIARY FUNCTIONS==========
+const validateUserData = (name, email, password) => {
     //validation
     if (!name || !email || !password)
         throw new Error({error: 'Incorrect User Data'});
     return true;
 };
 
+
 exports.login = async (req, res) => {
     console.log('try login');
     const {email, password} = req.body;
     
-   
-    
     //check user by email and hashed password
     let user = null;
+    let checkResult = null;
     try {
         user = await UserService.getUser({email});
-        await checkPassword(password, user.password);
+        //console.log('user found', user);
+        checkResult = await checkPassword(password, user.password);
+        console.log('passwords match!');
     }
     catch (err) {
+        console.log('login fail', err);
         return res.status(400).json({message: err.message, error: "get user error"});
     }
-    const token = makeWebToken(user._id);
     
-    return res.status(200).json({token});
+    
+    //try making token for user
+    let token = null;
+    try {
+        token = makeWebToken(user._id);
+        console.log('make token success!');
+    }
+    catch (err) {
+        console.log('make token fail', err);
+        return res.status(400).json({message: err.message, error: "make token fail"});
+    }
+    
+    return res.status(200).json({token, currentUserId: user._id});
 };
 
 exports.register = async (req, res) => {
@@ -69,7 +92,7 @@ exports.register = async (req, res) => {
     const {name, email, password} = req.body;
     
     try {
-        validateData(name, email, password);
+        validateUserData(name, email, password);
     }
     catch (err) {
         return res.status(400).json({message: err.message, error: "validate data error"});
@@ -86,10 +109,8 @@ exports.register = async (req, res) => {
         //user not found = OK
         console.log('user not found -> OK');
     }
-
     
-    
-    //create new user with hashed password
+    //try create new user with hashed password
     const encryptedPassword = await hashPassword(password);
     
     const newUser = {
@@ -104,14 +125,12 @@ exports.register = async (req, res) => {
         return res.status(400).json({message: err.message, error: "create user error"});
     }
     
-    //const token = makeWebToken(user._id);
-    
-    //return res.status(200).json({token});
-    return res.status(200).json(user);
+    return res.status(200).json({success: true});
 };
 
 exports.checkLogin = async (req, res) => {
-
-}
+    //token check is performed in express -> auth.middleware
+    return res.status(200).json({success: true});
+};
 
 

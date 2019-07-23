@@ -1,9 +1,9 @@
 var express = require('express');
 var router = express.Router();
 
-//var ApiController = require('../controllers/auth.controllers');
+var UserController = require('../controllers/user.controllers');
 
-//router.post('/login', AuthController.login);
+router.get('/user/:_id', UserController.getUser);
 //router.post('/register', AuthController.register);
 
 module.exports = router;

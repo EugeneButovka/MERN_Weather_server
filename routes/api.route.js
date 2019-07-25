@@ -7,5 +7,6 @@ var WeatherController = require('../controllers/weather.controllers');
 router.get('/user/:_id', UserController.getUser);
 router.post('/weather', WeatherController.saveWeather);
 router.get('/weather', WeatherController.getWeatherHistory);
+router.get('/weather/:_id', WeatherController.getWeatherDetails);
 
 module.exports = router;

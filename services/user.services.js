@@ -25,3 +25,13 @@ exports.createUser = async function (param) {
         throw new Error('Error while createUser');
     }
 };
+
+
+exports.updateUserById = async function (_id, param) {
+    try {
+        await User.findByIdAndUpdate(_id, param);
+        console.log('modified user with ID ', _id);
+    } catch (err) {
+        throw new Error('Error while modifying user');
+    }
+};

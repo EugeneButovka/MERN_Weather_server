@@ -134,3 +134,27 @@ exports.checkLogin = async (req, res) => {
 };
 
 
+
+
+exports.updateCurrentUser = async (req, res) => {
+    
+    //check user exits by email
+    try {
+        console.log('attempt to update current user');
+        
+        const {name, password} = req.body;
+        const _id = req.user._id;
+    
+        const encryptedPassword = await hashPassword(password);
+        
+        const user = await UserService.updateUserById(_id, {name, password:encryptedPassword});
+        console.log('current user updated!');
+        return res.status(200).json({success: true});
+    }
+    catch (err) {
+        //user not found = OK
+        console.log('update current user error');
+        return res.status(400).json({message: "error update current user", error: "error update current user"});
+    }
+};
+

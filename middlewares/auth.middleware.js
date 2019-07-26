@@ -36,4 +36,4 @@ exports.checkToken = (req, res, next) => {
         }
         //
     });
-}
+};

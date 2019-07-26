@@ -1,11 +1,11 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var UserController = require('../controllers/user.controllers');
-var WeatherController = require('../controllers/weather.controllers');
-var AuthController = require('../controllers/auth.controllers');
+const UserController = require('../controllers/user.controllers');
+const WeatherController = require('../controllers/weather.controllers');
+//const AuthController = require('../controllers/auth.controllers');
 
-router.post('/user', AuthController.updateCurrentUser);
+router.post('/user', UserController.updateCurrentUser);
 router.get('/user', UserController.getCurrentUser);
 router.get('/user/:_id', UserController.getUser);
 

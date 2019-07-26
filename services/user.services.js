@@ -1,6 +1,5 @@
 const User = require('../models/user.model');
-const bcrypt = require('bcryptjs');
-const config = require('config');
+
 
 exports.getUser = async function (param) {
     try {
@@ -35,3 +34,5 @@ exports.updateUserById = async function (_id, param) {
         throw new Error('Error while modifying user');
     }
 };
+
+

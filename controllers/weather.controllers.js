@@ -1,6 +1,6 @@
-const config = require('config');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+//const config = require('config');
+//const bcrypt = require('bcryptjs');
+//const jwt = require('jsonwebtoken');
 const WeatherService = require('../services/weather.services');
 
 exports.saveWeather = async (req, res) => {
